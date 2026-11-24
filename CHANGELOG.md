@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-24
+
 ### Added
 
 - Hypervolt integration for Gladys Assistant 5.1 or later, through the
@@ -31,4 +33,5 @@ the notes of the version's GitHub Release.
 - English, French, German and Spanish translations, and user documentation
   in the four languages.
 
-[Unreleased]: https://github.com/gboulvin/Gladys-Hypervolt/commits/main
+[Unreleased]: https://github.com/gboulvin/Gladys-Hypervolt/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/gboulvin/Gladys-Hypervolt/releases/tag/v1.0.1
