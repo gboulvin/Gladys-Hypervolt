@@ -1,0 +1,474 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "Hypervolt",
+  "description": {
+    "en": "Control your Hypervolt EV chargers: charge, modes, max current, lock, live power.",
+    "fr": "Pilotez vos bornes Hypervolt : charge, modes, courant max, verrouillage, puissance.",
+    "de": "Steuern Sie Ihre Hypervolt-Wallboxen: Laden, Modi, Maximalstrom, Sperre, Leistung.",
+    "es": "Controle sus cargadores Hypervolt: carga, modos, corriente máxima, bloqueo, potencia."
+  },
+  "version": "1.0.0",
+  "docker_image": "ghcr.io/gboulvin/gladys-hypervolt:1.0.0",
+  "gladys_version": ">=5.1.0",
+  "cover_image": "https://raw.githubusercontent.com/gboulvin/Gladys-Hypervolt/main/cover.png",
+  "categories": ["energy"],
+  "transports": ["cloud"],
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Your Hypervolt account",
+        "fr": "Votre compte Hypervolt",
+        "de": "Ihr Hypervolt-Konto",
+        "es": "Su cuenta Hypervolt"
+      },
+      "description": {
+        "en": "Sign in with the email and password of the Hypervolt mobile app. The integration talks to your chargers through the Hypervolt cloud: an Internet connection is required.",
+        "fr": "Connectez-vous avec l'e-mail et le mot de passe de l'application mobile Hypervolt. L'intégration dialogue avec vos bornes via le cloud Hypervolt : une connexion Internet est nécessaire.",
+        "de": "Melden Sie sich mit der E-Mail-Adresse und dem Passwort der Hypervolt-App an. Die Integration kommuniziert über die Hypervolt-Cloud mit Ihren Wallboxen: Eine Internetverbindung ist erforderlich.",
+        "es": "Inicie sesión con el correo electrónico y la contraseña de la aplicación móvil Hypervolt. La integración se comunica con sus cargadores a través de la nube de Hypervolt: se necesita conexión a Internet."
+      },
+      "links": [
+        {
+          "url": "https://www.hypervolt.co.uk",
+          "label": {
+            "en": "Hypervolt app",
+            "fr": "Application Hypervolt",
+            "de": "Hypervolt-App",
+            "es": "Aplicación Hypervolt"
+          }
+        }
+      ]
+    },
+    {
+      "key": "email",
+      "type": "string",
+      "label": {
+        "en": "Email",
+        "fr": "E-mail",
+        "de": "E-Mail",
+        "es": "Correo electrónico"
+      },
+      "placeholder": {
+        "en": "you@example.com",
+        "fr": "vous@exemple.fr",
+        "de": "sie@beispiel.de",
+        "es": "usted@ejemplo.es"
+      },
+      "required": true
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "Password",
+        "fr": "Mot de passe",
+        "de": "Passwort",
+        "es": "Contraseña"
+      },
+      "required": true
+    }
+  ],
+  "actions": [
+    {
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "timeout_seconds": 30
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "vehicle_plugged_in",
+      "label": {
+        "en": "Vehicle plugged in",
+        "fr": "Véhicule branché",
+        "de": "Fahrzeug angesteckt",
+        "es": "Vehículo conectado"
+      },
+      "description": {
+        "en": "A vehicle was plugged into a Hypervolt charger.",
+        "fr": "Un véhicule a été branché sur une borne Hypervolt.",
+        "de": "Ein Fahrzeug wurde an eine Hypervolt-Wallbox angesteckt.",
+        "es": "Se ha conectado un vehículo a un cargador Hypervolt."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" }
+        }
+      ]
+    },
+    {
+      "key": "vehicle_unplugged",
+      "label": {
+        "en": "Vehicle unplugged",
+        "fr": "Véhicule débranché",
+        "de": "Fahrzeug abgesteckt",
+        "es": "Vehículo desconectado"
+      },
+      "description": {
+        "en": "A vehicle was unplugged from a Hypervolt charger.",
+        "fr": "Un véhicule a été débranché d'une borne Hypervolt.",
+        "de": "Ein Fahrzeug wurde von einer Hypervolt-Wallbox abgesteckt.",
+        "es": "Se ha desconectado un vehículo de un cargador Hypervolt."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" }
+        }
+      ],
+      "variables": [
+        {
+          "key": "session_energy_kwh",
+          "type": "number",
+          "label": {
+            "en": "Session energy (kWh)",
+            "fr": "Énergie de la session (kWh)",
+            "de": "Energie der Sitzung (kWh)",
+            "es": "Energía de la sesión (kWh)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "charging_started",
+      "label": {
+        "en": "Charging started",
+        "fr": "Charge démarrée",
+        "de": "Laden gestartet",
+        "es": "Carga iniciada"
+      },
+      "description": {
+        "en": "A Hypervolt charger started charging a vehicle.",
+        "fr": "Une borne Hypervolt a commencé à charger un véhicule.",
+        "de": "Eine Hypervolt-Wallbox hat begonnen, ein Fahrzeug zu laden.",
+        "es": "Un cargador Hypervolt ha empezado a cargar un vehículo."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" }
+        }
+      ],
+      "variables": [
+        {
+          "key": "charge_mode",
+          "type": "string",
+          "label": {
+            "en": "Charge mode",
+            "fr": "Mode de charge",
+            "de": "Lademodus",
+            "es": "Modo de carga"
+          }
+        }
+      ]
+    },
+    {
+      "key": "charging_stopped",
+      "label": {
+        "en": "Charging stopped",
+        "fr": "Charge arrêtée",
+        "de": "Laden beendet",
+        "es": "Carga detenida"
+      },
+      "description": {
+        "en": "A Hypervolt charger stopped charging (charge complete, stopped or paused).",
+        "fr": "Une borne Hypervolt a arrêté la charge (terminée, arrêtée ou en pause).",
+        "de": "Eine Hypervolt-Wallbox hat das Laden beendet (fertig, gestoppt oder pausiert).",
+        "es": "Un cargador Hypervolt ha dejado de cargar (completada, detenida o en pausa)."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" }
+        }
+      ],
+      "variables": [
+        {
+          "key": "session_energy_kwh",
+          "type": "number",
+          "label": {
+            "en": "Session energy (kWh)",
+            "fr": "Énergie de la session (kWh)",
+            "de": "Energie der Sitzung (kWh)",
+            "es": "Energía de la sesión (kWh)"
+          }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "start_charging",
+      "label": {
+        "en": "Start charging",
+        "fr": "Lancer la charge",
+        "de": "Laden starten",
+        "es": "Iniciar la carga"
+      },
+      "description": {
+        "en": "Start charging the vehicle plugged into the charger.",
+        "fr": "Lance la charge du véhicule branché sur la borne.",
+        "de": "Startet das Laden des an der Wallbox angesteckten Fahrzeugs.",
+        "es": "Inicia la carga del vehículo conectado al cargador."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "charger",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "success",
+          "type": "boolean",
+          "label": {
+            "en": "Command sent",
+            "fr": "Commande envoyée",
+            "de": "Befehl gesendet",
+            "es": "Orden enviada"
+          }
+        }
+      ]
+    },
+    {
+      "key": "stop_charging",
+      "label": {
+        "en": "Stop charging",
+        "fr": "Arrêter la charge",
+        "de": "Laden stoppen",
+        "es": "Detener la carga"
+      },
+      "description": {
+        "en": "Stop the current charge.",
+        "fr": "Arrête la charge en cours.",
+        "de": "Beendet den laufenden Ladevorgang.",
+        "es": "Detiene la carga en curso."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "charger",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "success",
+          "type": "boolean",
+          "label": {
+            "en": "Command sent",
+            "fr": "Commande envoyée",
+            "de": "Befehl gesendet",
+            "es": "Orden enviada"
+          }
+        }
+      ]
+    },
+    {
+      "key": "set_charge_mode",
+      "label": {
+        "en": "Set the charge mode",
+        "fr": "Changer le mode de charge",
+        "de": "Lademodus einstellen",
+        "es": "Cambiar el modo de carga"
+      },
+      "description": {
+        "en": "Boost charges at full power, Eco and Super Eco follow your solar surplus.",
+        "fr": "Boost charge à pleine puissance, Eco et Super Eco suivent votre surplus solaire.",
+        "de": "Boost lädt mit voller Leistung, Eco und Super Eco folgen Ihrem Solarüberschuss.",
+        "es": "Boost carga a plena potencia, Eco y Super Eco siguen su excedente solar."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "charger",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" },
+          "required": true
+        },
+        {
+          "key": "mode",
+          "type": "select",
+          "label": { "en": "Mode", "fr": "Mode", "de": "Modus", "es": "Modo" },
+          "required": true,
+          "default": "boost",
+          "options": [
+            {
+              "value": "boost",
+              "label": { "en": "Boost", "fr": "Boost", "de": "Boost", "es": "Boost" }
+            },
+            { "value": "eco", "label": { "en": "Eco", "fr": "Eco", "de": "Eco", "es": "Eco" } },
+            {
+              "value": "super_eco",
+              "label": {
+                "en": "Super Eco",
+                "fr": "Super Eco",
+                "de": "Super Eco",
+                "es": "Super Eco"
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "success",
+          "type": "boolean",
+          "label": {
+            "en": "Command sent",
+            "fr": "Commande envoyée",
+            "de": "Befehl gesendet",
+            "es": "Orden enviada"
+          }
+        }
+      ]
+    },
+    {
+      "key": "set_max_current",
+      "label": {
+        "en": "Set the max current",
+        "fr": "Régler le courant max",
+        "de": "Maximalstrom einstellen",
+        "es": "Ajustar la corriente máxima"
+      },
+      "description": {
+        "en": "Limit the charging current, from 6 to 32 A.",
+        "fr": "Limite le courant de charge, de 6 à 32 A.",
+        "de": "Begrenzt den Ladestrom, von 6 bis 32 A.",
+        "es": "Limita la corriente de carga, de 6 a 32 A."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "charger",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" },
+          "required": true
+        },
+        {
+          "key": "current",
+          "type": "number",
+          "label": {
+            "en": "Max current (A)",
+            "fr": "Courant max (A)",
+            "de": "Maximalstrom (A)",
+            "es": "Corriente máxima (A)"
+          },
+          "placeholder": { "en": "e.g. 16", "fr": "ex. 16", "de": "z. B. 16", "es": "p. ej. 16" },
+          "required": true,
+          "default": 32,
+          "min": 6,
+          "max": 32
+        }
+      ],
+      "outputs": [
+        {
+          "key": "success",
+          "type": "boolean",
+          "label": {
+            "en": "Command sent",
+            "fr": "Commande envoyée",
+            "de": "Befehl gesendet",
+            "es": "Orden enviada"
+          }
+        }
+      ]
+    },
+    {
+      "key": "set_lock",
+      "label": {
+        "en": "Lock or unlock the charger",
+        "fr": "Verrouiller ou déverrouiller la borne",
+        "de": "Wallbox sperren oder entsperren",
+        "es": "Bloquear o desbloquear el cargador"
+      },
+      "description": {
+        "en": "A locked charger refuses to start a new charge.",
+        "fr": "Une borne verrouillée refuse de démarrer une nouvelle charge.",
+        "de": "Eine gesperrte Wallbox startet keinen neuen Ladevorgang.",
+        "es": "Un cargador bloqueado no inicia una nueva carga."
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "charger",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" },
+          "required": true
+        },
+        {
+          "key": "locked",
+          "type": "boolean",
+          "label": { "en": "Locked", "fr": "Verrouillée", "de": "Gesperrt", "es": "Bloqueado" },
+          "default": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "success",
+          "type": "boolean",
+          "label": {
+            "en": "Command sent",
+            "fr": "Commande envoyée",
+            "de": "Befehl gesendet",
+            "es": "Orden enviada"
+          }
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "key": "charger_status",
+      "label": {
+        "en": "Hypervolt charger",
+        "fr": "Borne Hypervolt",
+        "de": "Hypervolt-Wallbox",
+        "es": "Cargador Hypervolt"
+      },
+      "description": {
+        "en": "Live power, session energy, vehicle and charge state, with start/stop and mode buttons.",
+        "fr": "Puissance, énergie de session, état du véhicule et de la charge, boutons marche/arrêt et mode.",
+        "de": "Leistung, Sitzungsenergie, Fahrzeug- und Ladezustand, mit Start/Stopp- und Modus-Tasten.",
+        "es": "Potencia, energía de sesión, estado del vehículo y de la carga, con botones de inicio y modo."
+      },
+      "icon": "battery-charging",
+      "action_timeout_seconds": 15,
+      "settings": [
+        {
+          "key": "charger",
+          "type": "select",
+          "source": "devices",
+          "label": { "en": "Charger", "fr": "Borne", "de": "Wallbox", "es": "Cargador" }
+        }
+      ]
+    }
+  ]
+}
